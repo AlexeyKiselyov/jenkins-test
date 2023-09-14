@@ -8,11 +8,9 @@ pipeline {
 
         EC2_SERVER = '3.76.209.132' 
 
-        // DOCKERHUB_USERNAME = 'musicman123'      
-        DOCKERHUB_USERNAME = credentials('DOCKERHUB_USERNAME')      
+        DOCKERHUB_USERNAME = credentials('dockerhub_username')      
         
-        // DOCKERHUB_PASS = 'fender123' 
-        DOCKERHUB_PASS = credentials('DOCKERHUB_PASS') 
+        DOCKERHUB_PASS = credentials('dockerhub_pass') 
     }
 
     stages {
