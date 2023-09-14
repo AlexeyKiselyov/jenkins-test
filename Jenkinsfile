@@ -17,47 +17,33 @@ pipeline {
     }
 
     stages {
-        // stage('Build Docker Image') {
-        //     steps {
-        //         script {
-        //             // Выполните команду по созданию Docker-образа
-        //             sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
-        //         }
-        //     }
-        // }
-
-        // stage('Push Docker Image to Docker Hub') {
-        //     steps {
-        //         script {
-        //             // Войдите в Docker Hub с вашими учетными данными
-        //             sh "docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS}"
-
-        //             // Отправьте образ на Docker Hub
-        //             sh "docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
-        //         }
-        //     }
-        // }
-
-        stage('Deploy to EC2') {
+        stage('Build Docker Image') {
             steps {
-                sshagent(['SSH-AWS-EC2-Access']) {
-                    sh 'ssh -tt -o StrictHostKeyChecking=no ubuntu@${EC2_SERVER} "docker --version"'
+                script {
+                    // Выполните команду по созданию Docker-образа
+                    sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
                 }
             }
         }
 
-        // stage('Deploy to EC2') {
-        //     steps {
-        //         script {
-        //             def remoteServer = [:]
-        //             remoteServer.name = 'RemoteServer'
-        //             remoteServer.host = '${EC2_SERVER}'
-        //             remoteServer.user = 'ubuntu'
-        //             remoteServer.credentialsId = 'SSH-AWS-EC2-Access'
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    // Войдите в Docker Hub с вашими учетными данными
+                    sh "docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS}"
 
-        //             sshCommand remote: remoteServer, command: 'docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS} && docker stop ${DOCKER_IMAGE_TAG};docker rm ${DOCKER_IMAGE_TAG} || true && docker rmi ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} || true && docker run --name ${DOCKER_IMAGE_TAG} --restart unless-stopped -d -p 80:80 ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}'
-        //         }
-        //     }
-        // }
+                    // Отправьте образ на Docker Hub
+                    sh "docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['SSH-AWS-EC2-Access']) {
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_SERVER} "docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS} && docker stop ${DOCKER_IMAGE_TAG};docker rm ${DOCKER_IMAGE_TAG} || true && docker rmi ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} || true && docker run --name ${DOCKER_IMAGE_TAG} --restart unless-stopped -d -p 80:80 ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"'
+                }
+            }
+        }       
     } 
 }
