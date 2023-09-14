@@ -17,7 +17,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ."
+                    sh 'docker build -t $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG .'
                 }
             }
         }
@@ -25,9 +25,9 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    sh "docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS}"
+                    sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASS'
 
-                    sh "docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                    sh 'docker push $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG'
                 }
             }
         }
@@ -35,7 +35,7 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent(['SSH-AWS-EC2-Access']) {
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@${EC2_SERVER} "docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS} && docker stop ${DOCKER_IMAGE_TAG};docker rm ${DOCKER_IMAGE_TAG} || true && docker rmi ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} || true && docker run --name ${DOCKER_IMAGE_TAG} --restart unless-stopped -d -p 80:80 ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"'
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@$EC2_SERVER "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASS && docker stop $DOCKER_IMAGE_TAG || true && docker rm $DOCKER_IMAGE_TAG || true && docker rmi $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG || true && docker run --name DOCKER_IMAGE_TAG --restart unless-stopped -d -p 80:80 $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"'
                 }
             }
         }       
