@@ -6,7 +6,7 @@ pipeline {
 
         DOCKER_IMAGE_TAG = 'nginx_image_with_hello_world'
 
-        EC2_SERVER = '3.76.209.132' 
+        EC2_SERVER = '3.123.59.126' 
 
         DOCKERHUB_USERNAME = credentials('dockerhub_username')      
         
